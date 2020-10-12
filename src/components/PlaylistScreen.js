@@ -154,7 +154,7 @@ export default function LandingScreen() {
           <View style={{flex: 1}}>
             <View style={styles.viewTitle}>
               <Text style={styles.textTitle}>
-                {modalQualityVisible ? 'QUALITY' : 'STATIONS'}
+                {modalQualityVisible ? 'QUALITY' : 'CHANNELS'}
               </Text>
             </View>
             <View style={styles.contentView}>
@@ -201,10 +201,7 @@ export default function LandingScreen() {
           }}
           currentQuality={currentQuality}
           onTogglePlayback={togglePlayback}
-          onStop={() => {
-            stopPlay();
-            setCurrentChanel('111');
-          }}
+          onStop={stopPlay}
           currentSong={currentSong}
         />
       </SafeAreaView>
