@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     backgroundColor: GrayColor,
   },
   text: {
-    fontSize: 30,
+    fontSize: 24,
     textAlign: 'center',
     color: 'white',
   },
