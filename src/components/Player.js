@@ -1,8 +1,17 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import TrackPlayer from 'react-native-track-player';
 import {usePlaybackState} from 'react-native-track-player/lib';
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+  Pressable,
+  Animated,
+} from 'react-native';
 import TextTicker from 'react-native-text-ticker';
+import Clipboard from '@react-native-community/clipboard';
 
 const playIcon = require('../resources/icons/play-circle.png');
 const pauseIcon = require('../resources/icons/pause-circle.png');
@@ -44,17 +53,47 @@ export default function Player(props) {
     playPauseIcon = pauseIcon;
   }
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
   return (
     <View style={styles.card}>
+      <Animated.View
+        style={[
+          styles.toast,
+          {
+            opacity: fadeAnim, // Bind opacity to animated value
+          },
+        ]}>
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>Copied to Clipboard</Text>
+        </View>
+      </Animated.View>
       <View style={{width: '100%'}}>
-        <TextTicker
-          style={{fontSize: 20, color: 'white'}}
-          loop
-          bounce
-          repeatSpacer={10}
-          marqueeDelay={0}>
-          {currentSong}
-        </TextTicker>
+        <Pressable
+          onLongPress={() => {
+            Clipboard.setString(currentSong);
+            Animated.timing(fadeAnim, {
+              useNativeDriver: false,
+              toValue: 1,
+              duration: 100,
+            }).start();
+            setTimeout(() => {
+              Animated.timing(fadeAnim, {
+                useNativeDriver: false,
+                toValue: 0,
+                duration: 3000,
+              }).start();
+            }, 350);
+          }}>
+          <TextTicker
+            style={{fontSize: 20, color: 'white'}}
+            loop
+            bounce
+            repeatSpacer={10}
+            marqueeDelay={0}>
+            {currentSong}
+          </TextTicker>
+        </Pressable>
       </View>
       <View style={styles.controls}>
         <ControlButton
@@ -97,5 +136,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  toast: {
+    zIndex: 100,
+    backgroundColor: '#FF5252',
+    position: 'absolute',
+    alignItems: 'center',
+    padding: 5,
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderRadius: 20,
+    top: -5,
+  },
+  toastText: {
+    fontSize: 20,
+    color: 'white',
   },
 });
