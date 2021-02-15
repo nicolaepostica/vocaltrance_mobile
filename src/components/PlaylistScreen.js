@@ -92,6 +92,7 @@ export default function LandingScreen() {
     if (currentTrack == null) {
       await TrackPlayer.reset();
       await TrackPlayer.add(playlistData);
+      await TrackPlayer.skip(`${currentChanel}${currentQuality}`);
       await TrackPlayer.play();
       await getSongUpdate();
     } else {
