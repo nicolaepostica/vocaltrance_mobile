@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import TrackPlayer from 'react-native-track-player';
@@ -16,6 +17,7 @@ import playlistData from '../resources/data/stations-data';
 import chanelList from '../resources/data/chanel-list';
 import qualityList from '../resources/data/quality-list';
 
+const YOUTUBE_URL = 'https://www.youtube.com/channel/UCVy0TfTcM04H5tFlirLVB-A';
 const BASE_URL = 'https://vocaltrance.fm/api/v1/';
 const DEFAULT_SONG = 'Vocal Trance FM - Beat Trance Radio in Moldova';
 const keyDict = {
@@ -39,7 +41,7 @@ export default function LandingScreen() {
   const playbackState = usePlaybackState();
 
   useEffect(() => {
-    TrackPlayer.setupPlayer();
+    TrackPlayer.setupPlayer().then();
     TrackPlayer.updateOptions({
       stopWithApp: true,
       capabilities: [
@@ -67,7 +69,7 @@ export default function LandingScreen() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      getSongUpdate(currentChanel);
+      getSongUpdate(currentChanel).then();
     }, 5000);
     return () => clearInterval(interval);
   }, [currentChanel]);
@@ -148,11 +150,11 @@ export default function LandingScreen() {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={GrayColor} barStyle="light-content" />
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={styles.baseView}>
         <ScrollView
           contentContainerStyle={styles.flexGrow}
           showsVerticalScrollIndicator={false}>
-          <View style={{flex: 1}}>
+          <View style={styles.baseView}>
             <View style={styles.viewTitle}>
               <Text style={styles.textTitle}>
                 {modalQualityVisible ? 'QUALITY' : 'CHANNELS'}
@@ -179,7 +181,7 @@ export default function LandingScreen() {
                       <Text style={styles.text}>{item.title}</Text>
                     </TouchableOpacity>
                   ))
-                : chanelList.map((item, index) => (
+                : chanelList.map((item) => (
                     <TouchableOpacity
                       style={setSelectedStyle(item.id, currentChanel, RedColor)}
                       key={item.id}
@@ -193,6 +195,14 @@ export default function LandingScreen() {
                       <Text style={styles.text}>{item.title}</Text>
                     </TouchableOpacity>
                   ))}
+            </View>
+            <View style={styles.youtubeContainer}>
+              <TouchableOpacity
+                style={styles.youtube}
+                key="youtube"
+                onPress={() => Linking.openURL(YOUTUBE_URL)}>
+                <Text style={styles.text}>YOUTUBE</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
@@ -214,6 +224,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: GrayColor,
+  },
+  baseView: {
+    flex: 1,
   },
   text: {
     fontSize: 24,
@@ -239,5 +252,18 @@ const styles = StyleSheet.create({
   flexGrow: {
     flexGrow: 1,
     flexDirection: 'column',
+  },
+  youtubeContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  youtube: {
+    width: 140,
+    backgroundColor: RedColor,
+    paddingTop: 7,
+    paddingBottom: 7,
+    borderRadius: 15,
+    marginBottom: 20,
   },
 });

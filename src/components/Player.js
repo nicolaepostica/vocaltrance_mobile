@@ -68,7 +68,7 @@ export default function Player(props) {
           <Text style={styles.toastText}>Copied to Clipboard</Text>
         </View>
       </Animated.View>
-      <View style={{width: '100%'}}>
+      <View style={styles.textTickerContainer}>
         <Pressable
           onLongPress={() => {
             Clipboard.setString(currentSong);
@@ -86,7 +86,7 @@ export default function Player(props) {
             }, 350);
           }}>
           <TextTicker
-            style={{fontSize: 20, color: 'white'}}
+            style={styles.textTicker}
             loop
             bounce
             repeatSpacer={10}
@@ -149,6 +149,13 @@ const styles = StyleSheet.create({
     top: -5,
   },
   toastText: {
+    fontSize: 20,
+    color: 'white',
+  },
+  textTickerContainer: {
+    width: 350,
+  },
+  textTicker: {
     fontSize: 20,
     color: 'white',
   },
