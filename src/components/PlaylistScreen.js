@@ -195,14 +195,14 @@ export default function LandingScreen() {
                       <Text style={styles.text}>{item.title}</Text>
                     </TouchableOpacity>
                   ))}
-            </View>
-            <View style={styles.youtubeContainer}>
-              <TouchableOpacity
-                style={styles.youtube}
-                key="youtube"
-                onPress={() => Linking.openURL(YOUTUBE_URL)}>
-                <Text style={styles.text}>YOUTUBE</Text>
-              </TouchableOpacity>
+              <View style={styles.youtubeContainer}>
+                <TouchableOpacity
+                  style={styles.youtube}
+                  key="youtube"
+                  onPress={() => Linking.openURL(YOUTUBE_URL)}>
+                  <Text style={styles.textYoutube}>YouTube</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -254,16 +254,25 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   youtubeContainer: {
-    flex: 1,
+    // flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
+    marginTop: 20,
   },
   youtube: {
-    width: 140,
+    width: 340,
+    height: 170,
     backgroundColor: RedColor,
     paddingTop: 7,
     paddingBottom: 7,
-    borderRadius: 15,
+    borderRadius: 35,
     marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textYoutube: {
+    fontSize: 64,
+    textAlign: 'center',
+    color: 'white',
   },
 });
