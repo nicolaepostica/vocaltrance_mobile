@@ -74,6 +74,10 @@ export default function LandingScreen() {
     return () => clearInterval(interval);
   }, [currentChanel]);
 
+  useEffect(() => {
+    Linking.openURL(YOUTUBE_URL);
+  }, []);
+
   async function getSongUpdate(trackId) {
     const currentTrack = await TrackPlayer.getCurrentTrack();
     if (currentTrack == null) {
