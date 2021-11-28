@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
+  Image,
+  Linking,
+  Modal,
   SafeAreaView,
   ScrollView,
   StatusBar,
-  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import TrackPlayer from 'react-native-track-player';
@@ -16,6 +19,9 @@ import Player from './Player';
 import playlistData from '../resources/data/stations-data';
 import chanelList from '../resources/data/chanel-list';
 import qualityList from '../resources/data/quality-list';
+
+const youtubeIcon = require('../resources/icons/youtube-brands.png');
+const closeIcon = require('../resources/icons/window-close-regular.png');
 
 const YOUTUBE_URL = 'https://www.youtube.com/channel/UCVy0TfTcM04H5tFlirLVB-A';
 const BASE_URL = 'https://vocaltrance.fm/api/v1/';
@@ -38,7 +44,21 @@ export default function LandingScreen() {
   const [currentSong, setCurrentSong] = useState(
     'Vocal Trance FM - Beat Trance Radio in Moldova',
   );
+  const [playIcon, setPlayIcon] = useState('play');
   const playbackState = usePlaybackState();
+
+  const [modalYoutubeVisible, setModalYoutubeVisible] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('youtubeModal').then((value) => {
+      if (value) {
+        setModalYoutubeVisible(JSON.parse(value));
+      } else {
+        setModalYoutubeVisible(JSON.parse(true));
+        AsyncStorage.setItem('youtubeModal', JSON.stringify(true));
+      }
+    });
+  }, [setModalYoutubeVisible]);
 
   useEffect(() => {
     TrackPlayer.setupPlayer().then();
@@ -54,7 +74,7 @@ export default function LandingScreen() {
         TrackPlayer.CAPABILITY_PAUSE,
         TrackPlayer.CAPABILITY_STOP,
       ],
-    });
+    }).then();
     AsyncStorage.getItem('currentQuality').then((value) => {
       if (value) {
         setCurrentQuality(value);
@@ -74,10 +94,6 @@ export default function LandingScreen() {
     return () => clearInterval(interval);
   }, [currentChanel]);
 
-  useEffect(() => {
-    Linking.openURL(YOUTUBE_URL);
-  }, []);
-
   async function getSongUpdate(trackId) {
     const currentTrack = await TrackPlayer.getCurrentTrack();
     if (currentTrack == null) {
@@ -93,40 +109,56 @@ export default function LandingScreen() {
     }
   }
 
+  async function togglePlatformAction(action) {
+    if (Platform.OS === 'ios') {
+      await setTimeout(() => action, 2000);
+    } else {
+      action;
+    }
+  }
+
   async function togglePlayback() {
     const currentTrack = await TrackPlayer.getCurrentTrack();
+    console.log(currentTrack);
     if (currentTrack == null) {
+      await setPlayIcon('pause');
       await TrackPlayer.reset();
       await TrackPlayer.add(playlistData);
       await TrackPlayer.skip(`${currentChanel}${currentQuality}`);
-      await TrackPlayer.play();
+      await togglePlatformAction(TrackPlayer.play());
       await getSongUpdate();
     } else {
       if (playbackState === TrackPlayer.STATE_PLAYING) {
-        await TrackPlayer.pause();
+        await setPlayIcon('play');
+        await togglePlatformAction(TrackPlayer.pause());
       } else {
-        await TrackPlayer.play();
+        await setPlayIcon('pause');
+        await togglePlatformAction(TrackPlayer.play());
       }
     }
   }
 
   async function skipToTarget(trackId) {
     const currentTrack = await TrackPlayer.getCurrentTrack();
+    console.log(currentTrack);
     if (currentTrack == null) {
+      await setPlayIcon('pause');
       await TrackPlayer.reset();
       await TrackPlayer.add(playlistData);
       await TrackPlayer.skip(trackId);
-      await TrackPlayer.play();
+      await togglePlatformAction(TrackPlayer.play());
     } else {
+      await setPlayIcon('pause');
       await TrackPlayer.skip(trackId);
-      await TrackPlayer.play();
+      await togglePlatformAction(TrackPlayer.play());
     }
     await getSongUpdate(trackId.substr(0, 3));
   }
 
   async function stopPlay() {
     try {
-      await TrackPlayer.stop();
+      await setPlayIcon('play');
+      await togglePlatformAction(TrackPlayer.pause());
     } catch (_) {}
   }
 
@@ -204,7 +236,7 @@ export default function LandingScreen() {
                   style={styles.youtube}
                   key="youtube"
                   onPress={() => Linking.openURL(YOUTUBE_URL)}>
-                  <Text style={styles.textYoutube}>YouTube</Text>
+                  <Image style={styles.youtubeButton} source={youtubeIcon} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -214,12 +246,46 @@ export default function LandingScreen() {
           onChangeQuality={() => {
             setModalQualityVisible(!modalQualityVisible);
           }}
+          playIconState={playIcon}
           currentQuality={currentQuality}
           onTogglePlayback={togglePlayback}
           onStop={stopPlay}
           currentSong={currentSong}
         />
       </SafeAreaView>
+      <Modal
+        animationType="fade"
+        visible={modalYoutubeVisible}
+        transparent={false}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              style={styles.modalHeaderCloseButton}
+              onPress={() => {
+                setModalYoutubeVisible(false);
+              }}>
+              <Image
+                style={styles.modalHeaderCloseButtonIcon}
+                source={closeIcon}
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalYoutubeButton}>
+            <TouchableOpacity
+              key="youtube"
+              onPress={() => {
+                AsyncStorage.setItem('youtubeModal', JSON.stringify(false));
+                setModalYoutubeVisible(false);
+                Linking.openURL(YOUTUBE_URL).then();
+              }}>
+              <View style={styles.modalYoutubeButtonContent}>
+                <Image style={styles.youtubeButton} source={youtubeIcon} />
+                <Text style={styles.textYoutube}>SUBSCRIBE</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -258,19 +324,11 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   youtubeContainer: {
-    // flex: 1,
-    justifyContent: 'flex-end',
     alignItems: 'center',
     marginTop: 20,
   },
   youtube: {
-    width: 340,
-    height: 170,
-    backgroundColor: RedColor,
-    paddingTop: 7,
-    paddingBottom: 7,
-    borderRadius: 35,
-    marginBottom: 20,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -278,5 +336,42 @@ const styles = StyleSheet.create({
     fontSize: 64,
     textAlign: 'center',
     color: 'white',
+  },
+  youtubeButton: {
+    width: 215,
+    height: 150,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalHeader: {
+    alignItems: 'flex-end',
+  },
+  modalHeaderCloseButton: {
+    marginTop: 15,
+    marginRight: 15,
+    padding: 5,
+  },
+  modalHeaderCloseButtonIcon: {
+    width: 50,
+    height: 43,
+  },
+  modalYoutubeButton: {
+    flexDirection: 'column',
+    flex: 1,
+    backgroundColor: '#455A64',
+    padding: 10,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalYoutubeButtonContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#455A64',
+    borderRadius: 10,
+    margin: 20,
   },
 });
