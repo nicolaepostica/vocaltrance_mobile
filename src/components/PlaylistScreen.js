@@ -23,7 +23,7 @@ import qualityList from '../resources/data/quality-list';
 const youtubeIcon = require('../resources/icons/youtube-brands.png');
 const closeIcon = require('../resources/icons/window-close-regular.png');
 
-const YOUTUBE_URL = 'https://www.youtube.com/channel/UCVy0TfTcM04H5tFlirLVB-A';
+const YOUTUBE_URL = 'https://www.youtube.com/c/TravelEmotions';
 const BASE_URL = 'https://vocaltrance.fm/api/v1/';
 const DEFAULT_SONG = 'Vocal Trance FM - Beat Trance Radio in Moldova';
 const keyDict = {
